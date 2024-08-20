@@ -36,8 +36,7 @@ class Entity:
         self.pos[0] += vel[0]
         hitable_tiles = self.get_tile_hits(self.rect(), tiles)
         curr_rect = self.rect()
-        directions = {'left': False, 'right': False,
-                      'up': False, 'down': False}
+        directions = {'left': False, 'right': False, 'up': False, 'down': False}
 
         for tile in hitable_tiles:
             if vel[0] > 0:
@@ -67,3 +66,8 @@ class Entity:
 class Player(Entity):
     def __init__(self, app, pos, size, type, animated=None) -> None:
         super().__init__(app, pos, size, type, animated)
+
+    def update(self):
+        super().update()
+
+        

@@ -5,6 +5,7 @@ import src.utils as utils
 import src.anim_manager as anim_manager
 import src.tilemap as tilemap
 import src.entity as entities
+import src.mouse as m
 
 class App:
     def __init__(self) -> None:
@@ -20,6 +21,7 @@ class App:
         self.circles = []
         self.circle_particles = [] 
         self.offset = [0,0] 
+        self.inputs = [False, False, False, False]
 
         # ---- CLASSES 
         self.tile_map = None
@@ -36,7 +38,7 @@ class App:
     def load_level(self, level):
         level_data = self.load_level_data(level)
         spawn_points = self.load_spawn_points(level_data)
-        self.player = entities.Player(self, [50,100], [set.CELL_SIZE, set.CELL_SIZE], 'player', True)
+        self.player = entities.Player(self, [50,50], [set.CELL_SIZE, set.CELL_SIZE], 'player', True)
 
 # ---- INIT PG
 pg.init()
@@ -45,6 +47,7 @@ display: pg.Surface = pg.Surface((set.WIDTH, set.HEIGHT))
 clock: pg.time = pg.time.Clock()
         
 app = App()
+mouse = m.Mouse(app)
 tile_map = tilemap.TileMap(app)
 
 # ---- WINDOWS 
@@ -53,7 +56,7 @@ def test_game_loop():
 
     while True:
         # --------- UPDATE --------- #
-        run(app)
+        run()
         display.fill(set.TEST_COLOR)
 
         # --------- PLAYER --------- #
@@ -80,7 +83,7 @@ def main_game_loop():
     pass
 
 # ---- MAIN PG FUNCS
-def update(app):
+def update():
     clock.tick(set.FPS)
     pg.display.set_caption(f'{clock.get_fps()}')
     app.dt = clock.tick(set.FPS)
@@ -95,9 +98,26 @@ def check_inputs():
             if e.key == pg.K_1:
                 pg.quit()
                 sys.exit()
+            if e.key == pg.K_a:
+                app.inputs[0] = True
+            if e.key == pg.K_d:
+                app.inputs[1] = True
+            if e.key == pg.K_w:
+                app.inputs[2] = True
+            if e.key == pg.K_s:
+                app.inputs[3] = True
+        if e.type == pg.KEYUP:
+            if e.key == pg.K_a:
+                app.inputs[0] = False
+            if e.key == pg.K_d:
+                app.inputs[1] = False
+            if e.key == pg.K_w:
+                app.inputs[2] = False
+            if e.key == pg.K_s:
+                app.inputs[3] = False
 
-def run(app):
-    update(app)
+def run():
+    update()
     check_inputs()
 
 if __name__ == '__main__':
