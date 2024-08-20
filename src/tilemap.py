@@ -100,11 +100,11 @@ class Tile_Editor:
         marker_names = os.listdir(set.MARKERS_PATH)
         decor_names = os.listdir(set.DECOR_PATH)
 
-        # [tile_type, tile_name, images, config]
+        # [tile_type:str, tile_name:str, images:list, config:dict]
         tilesets = []
         for tile_name in tileset_names:
             tile_ids = os.listdir(set.TILESET_PATH+f'{tile_name}')
-            tile_ids.reverse()
+            tile_ids.sort()
             tileset_images_paths = []
             config = None
             for tile_id in tile_ids:
@@ -115,6 +115,47 @@ class Tile_Editor:
                     f = open(f'{set.TILESET_PATH}{tile_name}/{tile_id}', 'r')
                     config = json.loads(f.read())
             tilesets.append(['tileset', tile_name, tileset_images_paths, config])
-            
-            
+        self.tile_data.append(tilesets)
+
+        bg_tiles = []
+        for bg_tile_name in bg_tile_names:
+            bg_tile_ids = os.listdir(set.BG_TILES_PATH+f'{bg_tile_name}')
+            bg_tile_ids.sort()
+            bg_tiles_images_paths = []
+            config = None 
+            for tile_id in bg_tile_ids:
+                if tile_id[-3:] == 'png':
+                    full_tileset_path = f'{set.BG_TILES_PATH}{bg_tile_name}/{tile_id}'
+                    bg_tiles_images_paths.append(full_tileset_path)
+                else:
+                    f = open(f'{set.BG_TILES_PATH}{bg_tile_name}/{tile_id}', 'r')
+                    config = json.loads(f.read())
+            bg_tiles.append(['bg_tiles', bg_tile_name, bg_tiles_images_paths, config])
+        self.tile_data.append(bg_tiles)
+
+        decors= []
+        for decor_name in decor_names:
+            decor_ids = os.listdir(set.DECOR_PATH+f'{decor_name}') 
+            decor_ids.sort()
+            decor_images_paths = [] 
+            config = None 
+            for decor_id in decor_ids:
+                if decor_id[-3:] == 'png':
+                    full_decor_path = f'{set.DECOR_PATH}{decor_name}/{decor_id}'
+                    decor_images_paths.append(full_decor_path)
+                else:
+                    f = open(f'{set.DECOR_PATH}{decor_name}/{decor_id}', 'r')
+                    config = json.loads(f.read())
+            decors.append(['decor', decor_name, decor_images_paths, config])
+        self.tile_data.append(decors)
+
+
+        '''
+            [
+                [
+                    [tile_type:str, tile_name:str, images:list, config:dict],
+                    [tile_type:str, tile_name:str, images:list, config:dict],
+                ]
+            ]
+        '''
         

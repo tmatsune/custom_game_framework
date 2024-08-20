@@ -21,27 +21,53 @@ class Level_Editor:
         # ------ VARS ------ #
         self.left_clicked = False
         self.right_clicked = False
-        self.tile_index = 0
-        self.tile_img_index = 0
-        self.curr_map_id = -1
-        self.layer = 0 
-        self.curr_tile = None
+        self.curr_map = None
+        self.layer = 0
 
         # ----- CLASSES ----- #
         self.mouse = m.Mouse(self)
         pg.mouse.set_visible(False)
         self.tile_editor = tilemap.Tile_Editor(self)
 
+        # ------ CURR TILE ----- #
+        self.tile_type = 0 
+        self.tile_name = 0
+        self.tile_img_index = 0
+        self.curr_tile = None
 
     def render(self):
-
         self.display.fill((0, 0, 0))
+
+        # --------- HANDLE CURR TILE ---------- #
+        if self.tile_type > 0:
+            self.tile_type %= len(self.tile_editor.tile_data)
+
+
+        elif self.tile_type < 0:
+            self.tile_type = len(self.tile_editor.tile_data) - 1
+
+        ui_hash = {
+            'tile_type': None,
+            'tile_name': "TODO",
+            'tile_id': "TODO"
+        }
+        if self.tile_editor.tile_data[self.tile_type][0][0] in {'tileset', 'bg_tiles'}:
+            print(f'{self.tile_editor.tile_data[self.tile_type][0][0]} have same config in tile_folder(tile_name)')
+            print(f'tile type: [{self.tile_type}, {self.tile_editor.tile_data[self.tile_type][0][0]}]')
+        elif self.tile_editor.tile_data[self.tile_type][0][0] in {'decor'}:
+            print(f'{self.tile_editor.tile_data[self.tile_type][0][0]} each tile in folder(tile_name) has their own custom config')
+            print(f'tile type: [{self.tile_type}, {self.tile_editor.tile_data[self.tile_type][0][0]}]')
 
         # ----- MOUSE ---- #
         mouse_pos = pg.mouse.get_pos()
         self.mouse.pos = [mouse_pos[0]//2, mouse_pos[1]//2]
         self.mouse.update()
         mouse_rect = self.mouse.rect()
+
+        # --------- UI --------- #
+
+        tile_type_text = utils.text_surface(f'type: {tile_type}', 10, False, set.WHITE)
+        self.display.blit(tile_type_text, [set.WIDTH - tile_type_text.get_width() - 10, 10])
 
         # ----- BLIT SCREENS ----- #
         self.mouse.render(self.display)
@@ -58,6 +84,10 @@ class Level_Editor:
                 if e.key == pg.K_ESCAPE:
                     pg.quit()
                     sys.exit()
+                if e.key == pg.K_COMMA:
+                    self.tile_type -= 1
+                if e.key == pg.K_PERIOD:
+                    self.tile_type += 1
 
     def update(self):
         self.clock.tick(set.FPS)

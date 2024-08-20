@@ -7,6 +7,10 @@ import src.tilemap as tilemap
 import src.entity as entities
 import src.mouse as m
 
+'''
+GAME_ENGINE: VERSION 1.0
+'''
+
 class App:
     def __init__(self) -> None:
         # ---- VARS
