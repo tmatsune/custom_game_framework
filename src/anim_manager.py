@@ -16,7 +16,7 @@ class AnimationData:
                         utils.get_image(full_path+img, [set.CELL_SIZE, set.CELL_SIZE]))
                 else:
                     f = open(full_path + img, 'r')
-                    config = json.loads(f.read())
+                    config = json.loads(f.read()) 
                     f.close()
                     self.animations_data[anim]['config'] = config
         self.create_animations()
