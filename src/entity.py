@@ -1,5 +1,5 @@
 import pygame as pg 
-import src.settings as set
+import src.settings as s
 
 class Entity:
     def __init__(self, app, pos, size, type, animated=None) -> None:
@@ -18,7 +18,7 @@ class Entity:
 
     def render(self, surf, offset=[0,0]):
         image = self.anim.image()
-        pg.draw.rect(surf, (255,0,0), (self.pos[0] - offset[0], self.pos[1] - offset[1], set.CELL_SIZE, set.CELL_SIZE), 1)
+        pg.draw.rect(surf, (255,0,0), (self.pos[0] - offset[0], self.pos[1] - offset[1], s.CELL_SIZE, s.CELL_SIZE), 1)
         surf.blit(image, (self.pos[0], self.pos[1]))
 
     def rect(self):
@@ -70,4 +70,4 @@ class Player(Entity):
     def update(self):
         super().update()
 
-        
+

@@ -1,5 +1,5 @@
 import pygame as pg, os, json
-import src.settings as set
+import src.settings as s
 import src.utils as utils
 
 class AnimationData:
@@ -13,7 +13,7 @@ class AnimationData:
             for img in os.listdir(path + '/' + anim):
                 if img.split('.')[-1] == 'png':
                     self.animations_data[anim]['images'].append(
-                        utils.get_image(full_path+img, [set.CELL_SIZE, set.CELL_SIZE]))
+                        utils.get_image(full_path+img, [s.CELL_SIZE, s.CELL_SIZE]))
                 else:
                     f = open(full_path + img, 'r')
                     config = json.loads(f.read()) 
@@ -61,7 +61,7 @@ class AnimationManager:
         for anim_type in os.listdir(path):
             anims = os.listdir(path + anim_type)
             if anims:
-                self.animations[anim_type] = AnimationData(set.ANIM_PATH + anim_type, anim_type)
+                self.animations[anim_type] = AnimationData(s.ANIM_PATH + anim_type, anim_type)
 
     def get_anim_data(self, type):
         if type in self.animations:

@@ -1,6 +1,6 @@
 import pygame as pg
 import os, math, random, sys 
-import src.settings as set
+import src.settings as s
 import src.utils as utils
 import src.anim_manager as anim_manager
 import src.tilemap as tilemap
@@ -29,7 +29,7 @@ class App:
 
         # ---- CLASSES 
         self.tile_map = None
-        self.anim_manager = anim_manager.AnimationManager(f'{set.ANIM_PATH}')
+        self.anim_manager = anim_manager.AnimationManager(f'{s.ANIM_PATH}')
         
         # ---- ENTITIES    
         self.player = None
@@ -42,12 +42,12 @@ class App:
     def load_level(self, level):
         level_data = self.load_level_data(level)
         spawn_points = self.load_spawn_points(level_data)
-        self.player = entities.Player(self, [50,50], [set.CELL_SIZE, set.CELL_SIZE], 'player', True)
+        self.player = entities.Player(self, [50,50], [s.CELL_SIZE, s.CELL_SIZE], 'player', True)
 
 # ---- INIT PG
 pg.init()
-screen: pg.display = pg.display.set_mode((set.SCREEN_WIDTH, set.SCREEN_HEIGHT))
-display: pg.Surface = pg.Surface((set.WIDTH, set.HEIGHT))
+screen: pg.display = pg.display.set_mode((s.SCREEN_WIDTH, s.SCREEN_HEIGHT))
+display: pg.Surface = pg.Surface((s.WIDTH, s.HEIGHT))
 clock: pg.time = pg.time.Clock()
         
 app = App()
@@ -61,7 +61,7 @@ def test_game_loop():
     while True:
         # --------- UPDATE --------- #
         run()
-        display.fill(set.TEST_COLOR)
+        display.fill(s.TEST_COLOR)
 
         # --------- PLAYER --------- #
         app.player.update()
@@ -88,9 +88,9 @@ def main_game_loop():
 
 # ---- MAIN PG FUNCS
 def update():
-    clock.tick(set.FPS)
+    clock.tick(s.FPS)
     pg.display.set_caption(f'{clock.get_fps()}')
-    app.dt = clock.tick(set.FPS)
+    app.dt = clock.tick(s.FPS)
     app.dt /= 1000
 
 def check_inputs():

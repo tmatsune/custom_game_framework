@@ -1,6 +1,6 @@
 import pygame as pg, sys
 import src.mouse as m
-import src.settings as set
+import src.settings as s
 import src.utils as utils 
 import src.tilemap as tilemap
 
@@ -9,8 +9,8 @@ class Level_Editor:
     def __init__(self) -> None:
         pg.init()
         # ------ PG DATA ------ #
-        self.screen: pg.display = pg.display.set_mode((set.SCREEN_WIDTH, set.SCREEN_HEIGHT))
-        self.display: pg.Surface = pg.Surface((set.WIDTH, set.HEIGHT))
+        self.screen: pg.display = pg.display.set_mode((s.SCREEN_WIDTH, s.SCREEN_HEIGHT))
+        self.display: pg.Surface = pg.Surface((s.WIDTH, s.HEIGHT))
         self.dt: float = 0
         self.clock: pg.time = pg.time.Clock()
 
@@ -19,7 +19,7 @@ class Level_Editor:
         self.offset = [0, 0]
         # ------- HASH DATA ------- # 
         self.fonts = {
-            'basic': f'{set.FONTS_PATH}basic.ttf'
+            'basic': f'{s.FONTS_PATH}basic.ttf'
         }
 
         # ------ VARS ------ #
@@ -41,6 +41,11 @@ class Level_Editor:
 
     def render(self):
         self.display.fill((0, 0, 0))
+
+        # --------- MAIN RENDER ACTIONS ---------- #
+
+        self.offset[0] += (self.inputs[1] - self.inputs[0]) * s.CELL_SIZE
+        self.offset[1] += (self.inputs[3] - self.inputs[2]) * s.CELL_SIZE
 
         # --------- HANDLE CURR TILE ---------- #
         if self.tile_type >= 0:
@@ -66,8 +71,10 @@ class Level_Editor:
         }
 
         if self.tile_editor.tile_data[self.tile_type][0][0] in {'tileset', 'bg_tiles', 'decor'}:
-            ui_data['tile_type'] = self.tile_editor.tile_data[self.tile_type][0][0]
-            ui_data['tile_name'] = self.tile_editor.tile_data[self.tile_type][self.tile_name][1]
+            tile_type = self.tile_editor.tile_data[self.tile_type][0][0]
+            tile_name = self.tile_editor.tile_data[self.tile_type][self.tile_name][1]
+            ui_data['tile_type'] = tile_type
+            ui_data['tile_name'] = tile_name
             tile_path = self.tile_editor.tile_data[self.tile_type][self.tile_name][2][self.tile_id]
             tile_png = self.tile_editor.tile_data[self.tile_type][self.tile_name][2][self.tile_id].split('/')[-1]
             tile_id = tile_png.split('.')[0]
@@ -75,8 +82,7 @@ class Level_Editor:
             tile_config = self.tile_editor.tile_data[self.tile_type][self.tile_name][3][tile_id]
 
             tile_image = utils.get_image(tile_path, tile_config['size'])
-            self.curr_tile = [tile_image]
-
+            self.curr_tile = [tile_type, tile_name, tile_id, tile_path, tile_image]
 
         # ----- MOUSE ---- #
         mouse_pos = pg.mouse.get_pos()
@@ -86,11 +92,19 @@ class Level_Editor:
 
         # --------- RENDER ------- # 
 
-        
+        self.tile_editor.test_render(self.display, self.offset)
 
         if self.curr_tile:
-            pg.draw.rect(self.display, set.WHITE, (self.mouse.pos[0], self.mouse.pos[1], set.CELL_SIZE, set.CELL_SIZE), 1)
-            self.display.blit(self.curr_tile[0], (self.mouse.pos[0], self.mouse.pos[1]))
+            pg.draw.rect(self.display, s.WHITE, (self.mouse.pos[0], self.mouse.pos[1], s.CELL_SIZE, s.CELL_SIZE), 1)
+            self.display.blit(self.curr_tile[-1], (self.mouse.pos[0], self.mouse.pos[1]))
+
+        # --------- ADDING/REMOVING TILES --------- #
+
+        tile_pos = [(self.mouse.pos[0] + self.offset[0]) // s.CELL_SIZE, (self.mouse.pos[1] + self.offset[1]) // s.CELL_SIZE]
+        if self.mouse.left_click == m.Click.JUST_PRESSED or self.mouse.left_click == m.Click.PRESSED:
+            self.tile_editor.add_tile(tile_pos, self.curr_tile, self.layer)
+        if self.mouse.right_click == m.Click.JUST_PRESSED or self.right_clicked == m.Click.PRESSED:
+            pass
 
         # --------- UI --------- #
 
@@ -98,14 +112,20 @@ class Level_Editor:
         tile_name = ui_data['tile_name']
         tile_id = ui_data['tile_id']
 
-        tile_type_text = utils.text_surface_1(f'Type: {tile_type}', 12, False, set.WHITE, font_path=self.fonts['basic'])
-        self.display.blit(tile_type_text, [set.WIDTH - tile_type_text.get_width() - 10, 10])
+        tile_type_text = utils.text_surface_1(f'Type: {tile_type}', 12, False, s.WHITE, font_path=self.fonts['basic'])
+        self.display.blit(tile_type_text, [s.WIDTH - tile_type_text.get_width() - 10, 10])
 
-        tile_name_text = utils.text_surface_1(f'Name: {tile_name}', 12, False, set.WHITE, font_path=self.fonts['basic'])
-        self.display.blit(tile_name_text, [set.WIDTH - tile_name_text.get_width() - 10, 30])
+        tile_name_text = utils.text_surface_1(f'Name: {tile_name}', 12, False, s.WHITE, font_path=self.fonts['basic'])
+        self.display.blit(tile_name_text, [s.WIDTH - tile_name_text.get_width() - 10, 30])
 
-        tile_id_text = utils.text_surface_1(f'ID: {tile_id}', 12, False, set.WHITE, font_path=self.fonts['basic'])
-        self.display.blit(tile_id_text, [set.WIDTH - tile_id_text.get_width() - 10, 50])
+        tile_id_text = utils.text_surface_1(f'ID: {tile_id}', 12, False, s.WHITE, font_path=self.fonts['basic'])
+        self.display.blit(tile_id_text, [s.WIDTH - tile_id_text.get_width() - 10, 50])
+
+        layer_text = utils.text_surface_1(f'Layer: {self.layer}', 12, False, s.WHITE, font_path=self.fonts['basic'])
+        self.display.blit(layer_text, [10, 30])
+
+        top_left_pos_text = utils.text_surface_1(f'{tile_pos[0]},{tile_pos[1]}', 12, False, s.WHITE, font_path=self.fonts['basic'])
+        self.display.blit(top_left_pos_text, [10, 10])
 
         # ----- BLIT SCREENS ----- #
         self.mouse.render(self.display)
@@ -141,10 +161,41 @@ class Level_Editor:
                 if e.key == pg.K_PERIOD:
                     self.layer += 1
 
+                if e.key == pg.K_LEFT:
+                    self.inputs[0] = True
+                if e.key == pg.K_RIGHT:
+                    self.inputs[1] = True 
+                if e.key == pg.K_UP:
+                    self.inputs[2] = True
+                if e.key == pg.K_DOWN:
+                    self.inputs[3] = True
+
+            if e.type == pg.KEYUP:
+                if e.key == pg.K_LEFT:
+                    self.inputs[0] = False
+                if e.key == pg.K_RIGHT:
+                    self.inputs[1] = False
+                if e.key == pg.K_UP:
+                    self.inputs[2] = False
+                if e.key == pg.K_DOWN:
+                    self.inputs[3] = False
+    
+
+            if e.type == pg.MOUSEBUTTONDOWN:
+                if e.button == 1:
+                    self.left_clicked = True
+                if e.button == 3:
+                    self.right_clicked = True
+            if e.type == pg.MOUSEBUTTONUP:
+                if e.button == 1:
+                    self.left_clicked = False
+                if e.button == 3:
+                    self.right_clicked = False
+
     def update(self):
-        self.clock.tick(set.FPS)
+        self.clock.tick(s.FPS)
         pg.display.set_caption(f'{self.clock.get_fps()}')
-        self.dt = self.clock.tick(set.FPS)
+        self.dt = self.clock.tick(s.FPS)
         self.dt /= 1000
 
     def run(self):
