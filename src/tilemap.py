@@ -81,7 +81,7 @@ class TileMap:
     def load_map(self, map):
         pass
 
-
+# tile: (0,0): ['tileset', 'tileset_1', '0', 'src/tiles/tileset/tileset_1/0.png', <Surface(16x16x32 SW)>]
 class Tile_Editor:
     def __init__(self, app) -> None:
         self.app = app
@@ -100,11 +100,47 @@ class Tile_Editor:
             self.tile_map.tiles[key][layer] = tile_data
         self.tile_map.tiles[key][layer] = tile_data
 
-    def remove_tile(self, pos, tile_data, layer):
-        pass
+    def remove_tile(self, pos, layer):
+        key = (int(pos[0]), int(pos[1]))
+        if key in self.tile_map.tile_map:
+            if layer in self.tile_map.tiles[key]:
+                del self.tile_map.tiles[key][layer]
+                if len(self.tile_map.tiles[key]) == 0:
+                    del self.tile_map.tiles[key]
+
+    def auto_tile(self, starting_pos, tileset_imgs, layer):
+        v = set()
+        key = tuple(starting_pos)
+        if key not in self.tile_map.tiles:
+            print('pos not in tile map')
+            return
+        if layer not in self.tile_map.tiles[key]:
+            print('pos in tile map, but incorrect layer')
+            return
+        
+        # ['tileset', 'tileset_1', '0', 'src/tiles/tileset/tileset_1/0.png', <Surface(16x16x32 SW)>]
+        def dfs(pos, v: set):
+            if pos in v:
+                return
+            v.add(pos)
+            nearby_tiles = []
+            neighbors = []
+            for offset in tile_offsets:
+                search_pos = (pos[0] + offset[0], pos[1] + offset[1])
+                if search_pos in self.tile_map.tiles and layer in self.tile_map.tiles[search_pos]:
+                    nearby_tiles.append(offset)
+                    neighbors.append(search_pos)
+            auto_tile_key = tuple(sorted(nearby_tiles))
+            if auto_tile_key in auto_tile_config:
+                tile_imgs = sorted(tileset_imgs)
+                self.tile_map.tiles[pos][layer][-1] = utils.get_image(tile_imgs[auto_tile_config[auto_tile_key]], [s.CELL_SIZE,s.CELL_SIZE])
+                self.tile_map.tiles[pos][layer][2] = str(auto_tile_config[auto_tile_key])
+            for n in neighbors:
+                dfs(n, v)
+        dfs(key, v)
+
 
     def test_render(self, surf, offset=[0, 0]):
-
         for c in range(int(0 + offset[0] // s.CELL_SIZE) - 1, int((s.COLS * s.CELL_SIZE + offset[0]) // s.CELL_SIZE) + 2):
             for r in range(int(0 + offset[1] // s.CELL_SIZE) - 1, int((s.ROWS * s.CELL_SIZE + offset[1]) // s.CELL_SIZE) + 2):
                 pos = (c, r)

@@ -107,7 +107,6 @@ class Level_Editor:
             pass
 
         # --------- UI --------- #
-
         tile_type = ui_data['tile_type']
         tile_name = ui_data['tile_name']
         tile_id = ui_data['tile_id']
@@ -142,6 +141,13 @@ class Level_Editor:
                 if e.key == pg.K_ESCAPE:
                     pg.quit()
                     sys.exit()
+                if e.key == pg.K_f:
+                    if self.curr_tile:
+                        tile_imgs = self.tile_editor.tile_data[self.tile_type][self.tile_name][2]
+                        tile_pos = [(self.mouse.pos[0] + self.offset[0]) // s.CELL_SIZE,
+                                    (self.mouse.pos[1] + self.offset[1]) // s.CELL_SIZE]
+                        self.tile_editor.auto_tile(tile_pos, tile_imgs, self.layer)
+
                 if e.key == pg.K_q:
                     self.tile_type -= 1
                 if e.key == pg.K_e:
