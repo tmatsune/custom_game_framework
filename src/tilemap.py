@@ -88,6 +88,22 @@ class Tile_Editor:
         self.layers = {}
         self.get_tile_data()
 
+    def get_visible_tiles(self, offset):
+        layers = {l: [] for l in self.all_layers}
+        objects = []
+        for c in range(int(0 + offset[0] // set.CELL_SIZE) - 1, int((set.COLS*set.CELL_SIZE + offset[0]) // set.CELL_SIZE) + 2):
+            for r in range(int(0 + offset[1] // set.CELL_SIZE) - 1, int((set.ROWS*set.CELL_SIZE + offset[1]) // set.CELL_SIZE) + 2):
+                pos = (c, r)
+                if pos in self.tile_map:
+                    for layer, data in self.tile_map[pos].items():
+                        tile_data = [pos] + data
+                        layers[layer].append(tile_data)
+                if pos in self.objects:
+                    data = self.objects[pos]
+                    tile = [pos] + data
+                    objects.append(tile)
+        return layers, objects
+
     def get_tile_data(self):
         # TILE_TYPES: tileset, bg_tiles, objects, markers
         # tileset are main tiles in game that entities cant get passed 
