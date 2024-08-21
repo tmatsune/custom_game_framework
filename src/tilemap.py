@@ -102,7 +102,7 @@ class Tile_Editor:
 
     def remove_tile(self, pos, layer):
         key = (int(pos[0]), int(pos[1]))
-        if key in self.tile_map.tile_map:
+        if key in self.tile_map.tiles:
             if layer in self.tile_map.tiles[key]:
                 del self.tile_map.tiles[key][layer]
                 if len(self.tile_map.tiles[key]) == 0:

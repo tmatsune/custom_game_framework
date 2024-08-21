@@ -104,7 +104,7 @@ class Level_Editor:
         if self.mouse.left_click == m.Click.JUST_PRESSED or self.mouse.left_click == m.Click.PRESSED:
             self.tile_editor.add_tile(tile_pos, self.curr_tile, self.layer)
         if self.mouse.right_click == m.Click.JUST_PRESSED or self.right_clicked == m.Click.PRESSED:
-            pass
+            self.tile_editor.remove_tile(tile_pos, self.layer)
 
         # --------- UI --------- #
         tile_type = ui_data['tile_type']
