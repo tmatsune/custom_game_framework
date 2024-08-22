@@ -28,7 +28,7 @@ class App:
         self.inputs = [False, False, False, False]
 
         # ---- CLASSES 
-        self.tile_map = None
+        self.tile_map = tilemap.TileMap(self)
         self.anim_manager = anim_manager.AnimationManager(f'{s.ANIM_PATH}')
         
         # ---- ENTITIES    
@@ -38,7 +38,8 @@ class App:
     def load_spawn_points(self, level_data):
         pass
     def load_level_data(self, level):
-        pass
+        self.tile_map.load_map(level)
+
     def load_level(self, level):
         level_data = self.load_level_data(level)
         spawn_points = self.load_spawn_points(level_data)
@@ -54,19 +55,30 @@ app = App()
 mouse = m.Mouse(app)
 tile_map = tilemap.TileMap(app)
 
+all_maps = []
+for level in os.listdir(s.MAP_PATH):
+    all_maps.append(level[:-5])
+
 # ---- WINDOWS 
 def test_game_loop():
-    app.load_level('test')
+    app.load_level(all_maps[0])
 
     while True:
         # --------- UPDATE --------- #
         run()
         display.fill(s.TEST_COLOR)
 
+        # -------- RENDER TILES ------- # 
+
+        layers = app.tile_map.get_visible_tiles(app.offset)
+        for key, layer in layers.items():
+            for tile in layer:
+                display.blit(tile[-1], tile[1])
+
         # --------- PLAYER --------- #
+
         app.player.update()
         app.player.render(display)
-
 
 
         # ------ BLIT SCREENS ------ #

@@ -62,21 +62,16 @@ class TileMap:
         self.objects = {}
         self.all_layers = []
 
-    def get_visible_tiles(self, surf, offset):
+    def get_visible_tiles(self, offset=[0,0]):
         layers = {l: [] for l in self.all_layers}
-        objects = []
         for c in range(int(0 + offset[0] // s.CELL_SIZE) - 1, int((s.COLS * s.CELL_SIZE + offset[0]) // s.CELL_SIZE) + 2):
             for r in range(int(0 + offset[1] // s.CELL_SIZE) - 1, int((s.ROWS * s.CELL_SIZE + offset[1]) // s.CELL_SIZE) + 2):
                 pos = (c, r)
-                if pos in self.tile_map:
-                    for layer, data in self.tile_map[pos].items():
+                if pos in self.tiles:
+                    for layer, data in self.tiles[pos].items():
                         tile_data = [pos] + data
-                        layers[layer].append(tile_data)
-                if pos in self.objects:
-                    data = self.objects[pos]
-                    tile = [pos] + data
-                    objects.append(tile)
-        return layers, objects
+                        layers[int(layer)].append(tile_data)
+        return layers
 
     def get_nearby_tiles(self, pos):
         p = [int(pos[0] // s.CELL_SIZE), int(pos[1] // s.CELL_SIZE)]
@@ -88,8 +83,27 @@ class TileMap:
                     print(layer)
         return tiles
 
-    def load_map(self, map):
-        pass
+    def load_map(self, map_name):
+        new_tiles = {}
+        all_layers = set()
+
+        path = f'{s.MAP_PATH}{map_name}.json'
+        fl = open(path, 'r')
+        map_data = json.load(fl)
+        fl.close()
+
+        for k, layers in map_data['tiles'].items():
+            key = str_to_tuple(k)
+            new_tiles[key] = {}
+
+            for layer, tile in layers.items():
+                tile.append(utils.get_image(tile[3], tile[4]['size']))
+                tile.insert(0, (key[0]*s.CELL_SIZE, key[1]*s.CELL_SIZE))
+                new_tiles[key][layer] = tile
+
+        self.tiles = new_tiles
+        self.all_layers = map_data['all_layers']
+        self.all_layers.sort()
 
 # tile: (0,0): ['tileset', 'tileset_1', '0', 'src/tiles/tileset/tileset_1/0.png', <Surface(16x16x32 SW)>]
 class Tile_Editor:
@@ -153,7 +167,10 @@ class Tile_Editor:
                 dfs(n, v)
         dfs(key, v)
 
-    def auto_tile_new_tile_path(self, tile, new_id): return f'{s.TILESET_PATH}{tile[1]}/{new_id}.png'
+    def auto_tile_new_tile_path(self, tile, new_id): return f'{s.TILES_PATH}{tile[0]}/{tile[1]}/{new_id}.png'
+
+    def flood_fill(self, starting_pos, layer):
+        pass
 
     def test_render(self, surf, offset=[0, 0]):
         for c in range(int(0 + offset[0] // s.CELL_SIZE) - 1, int((s.COLS * s.CELL_SIZE + offset[0]) // s.CELL_SIZE) + 2):
@@ -163,7 +180,7 @@ class Tile_Editor:
                     for layer, data in self.tile_map.tiles[pos].items():
                         surf.blit(data[-1], ( (pos[0] * s.CELL_SIZE) - offset[0], (pos[1] * s.CELL_SIZE) - offset[1]) )
 
-    def get_visible_tiles(self, offset):
+    def get_visible_tiles(self, offset=[0,0]):
         layers = {l: [] for l in self.all_layers}
         objects = []
         for c in range(int(0 + offset[0] // s.CELL_SIZE) - 1, int((s.COLS * s.CELL_SIZE + offset[0]) // s.CELL_SIZE) + 2):
@@ -177,7 +194,7 @@ class Tile_Editor:
                     data = self.objects[pos]
                     tile = [pos] + data
                     objects.append(tile)
-        return layers, objects
+        return layers
     
     def save_map(self, map_name):
         saved_tiles = {} 
