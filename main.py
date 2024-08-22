@@ -84,17 +84,33 @@ def test_game_loop():
         run()
         display.fill(s.TEST_COLOR)
 
+        # ------- SCROLL OFFSET ------- #
+        app.offset[0] += ((app.player.pos[0] - s.WIDTH // 2) - app.offset[0]) / 12
+        app.offset[1] += ((app.player.pos[1] - s.HEIGHT // 2) - app.offset[1]) / 12
+
+        if app.offset[0] < app.edges[0]:
+            app.offset[0] = app.edges[0]
+        if app.offset[0] + s.WIDTH > app.edges[1]:
+            app.offset[0] = app.edges[1] - s.WIDTH
+
+        if app.offset[1] < app.edges[2]:
+            app.offset[1] = app.edges[2]
+        if app.offset[1] + s.HEIGHT > app.edges[3]:
+            app.offset[1] = app.edges[3] - s.HEIGHT
+
+
         # -------- RENDER TILES ------- # 
 
         layers = app.tile_map.get_visible_tiles(app.offset)
         for key, layer in layers.items():
             for tile in layer:
-                display.blit(tile[-1], tile[1])
+                real_pos = [tile[0][0] * s.CELL_SIZE, tile[0][1] * s.CELL_SIZE]
+                display.blit(tile[-1], (real_pos[0] - app.offset[0], real_pos[1] - app.offset[1]))
 
         # --------- PLAYER --------- #
 
         app.player.update()
-        app.player.render(display)
+        app.player.render(display, app.offset)
 
 
         # ------ BLIT SCREENS ------ #
@@ -136,6 +152,7 @@ def check_inputs():
                 app.inputs[1] = True
             if e.key == pg.K_w:
                 app.inputs[2] = True
+                if app.player: app.player.jump()
             if e.key == pg.K_s:
                 app.inputs[3] = True
         if e.type == pg.KEYUP:

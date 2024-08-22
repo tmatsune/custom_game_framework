@@ -11,8 +11,14 @@ FPS = 60
 CELL_SIZE = 16
 COLS = WIDTH // CELL_SIZE
 ROWS = HEIGHT // CELL_SIZE
+GRAVITY = 1
 inf = float('inf')
 n_inf = float('-inf')
+
+# ------ DEFAULT ENTITY
+DEFAULT_SPEED = 4
+DEFAULT_JUMPS = 2
+DEFAULT_JUMP_SCALE = -12
 
 # ------ COLORS 
 RED = (255, 0, 0)

@@ -4,10 +4,17 @@ import src.settings as s
 class Entity:
     def __init__(self, app, pos, size, type, animated=None) -> None:
         self.app = app 
+        self.vel = [0,0]
         self.pos = pos.copy()
         self.size = size.copy()
         self.type = type 
+
+        self.speed = s.DEFAULT_SPEED
+        self.max_jumps = s.DEFAULT_JUMPS
+        self.jumps = s.DEFAULT_JUMPS
+        self.jump_scale = s.DEFAULT_JUMP_SCALE
         self.animated = animated
+
         if animated:
             self.state = 'idle'
             self.animation_data = app.anim_manager.get_anim_data(type)
@@ -19,7 +26,7 @@ class Entity:
     def render(self, surf, offset=[0,0]):
         image = self.anim.image()
         pg.draw.rect(surf, (255,0,0), (self.pos[0] - offset[0], self.pos[1] - offset[1], s.CELL_SIZE, s.CELL_SIZE), 1)
-        surf.blit(image, (self.pos[0], self.pos[1]))
+        surf.blit(image, (self.pos[0] - offset[0], self.pos[1] - offset[1]))
 
     def rect(self):
         return pg.Rect(self.pos[0], self.pos[1], self.size[0], self.size[1])
@@ -62,6 +69,18 @@ class Entity:
                 directions['up'] = True
         return directions
 
+    def get_tile_hits(self, rect, tiles):
+        hits = []
+        for tile in tiles:
+            if rect.colliderect(tile):
+                hits.append(tile)
+        return hits
+    
+    def jump(self):
+        if self.jumps > 0:
+            self.vel[1] = self.jump_scale
+            self.jumps -= 1
+    
 
 class Player(Entity):
     def __init__(self, app, pos, size, type, animated=None) -> None:
@@ -69,5 +88,17 @@ class Player(Entity):
 
     def update(self):
         super().update()
+
+        self.vel[1] = min(10, self.vel[1] + 1)
+        self.vel[0] = (self.app.inputs[1] - self.app.inputs[0]) * self.speed
+
+        nearby_rects = self.app.tile_map.get_nearby_tiles(self.pos)
+        collisions = self.movement(self.vel, nearby_rects)
+        
+        if collisions['down']:
+            self.vel[1] = 0 
+            self.jumps = self.max_jumps
+
+
 
 
