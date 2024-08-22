@@ -33,6 +33,7 @@ TEST_COLOR = (70,120,140)
 # IMAGES
 IMAGES_PATH = 'src/images/'
 ANIM_PATH = f'{IMAGES_PATH}animations/'
+IMAGES_IMAGES_PATH = f'{IMAGES_PATH}images/'
 
 #TILES
 TILES_PATH = 'src/tiles/'

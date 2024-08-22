@@ -1,5 +1,5 @@
-import pygame as pg
-import os, math, random, sys 
+import pygame as pg, os, math, random, sys 
+from pygame.locals import * 
 import src.settings as s
 import src.utils as utils
 import src.anim_manager as anim_manager
@@ -10,6 +10,7 @@ import src.mouse as m
 '''
 CUSTOM_GAME_FRAMEWORK: VERSION 1.0
 '''
+game_name = 'untitled game'
 
 class App:
     def __init__(self) -> None:
@@ -133,7 +134,7 @@ def main_game_loop():
 # ---- MAIN PG FUNCS
 def update():
     clock.tick(s.FPS)
-    pg.display.set_caption(f'{clock.get_fps()}')
+    pg.display.set_caption(game_name)
     app.dt = clock.tick(s.FPS)
     app.dt /= 1000
 
