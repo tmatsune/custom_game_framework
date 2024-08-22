@@ -36,5 +36,5 @@ DECOR_PATH = f'{TILES_PATH}decor/'
 
 #OTHER 
 FONTS_PATH = 'src/fonts/'
-MAPS_PATH = 'src/maps/'
+MAP_PATH = 'src/maps/'
 SOUND_PATH = 'src/sound/'

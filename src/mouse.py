@@ -18,12 +18,12 @@ class Mouse:
         self.right_click = Click.NONE
         self.pos = [0, 0]
         self.tile_pos = [0, 0]
-        self.mouse_rect = pg.Rect(0, 0, 5, 5)
+        self.mouse_rect = pg.Rect(0, 0, 3, 3)
 
     def update(self):
         self.tile_pos = [self.pos[0] // CELL_SIZE, self.pos[1] // CELL_SIZE]
         self.handle_click()
-        self.mouse_rect = pg.Rect(self.pos[0], self.pos[1], 5, 5)
+        self.mouse_rect = pg.Rect(self.pos[0], self.pos[1], 3, 3)
 
     def handle_click(self):
         # ---- LEFT CLICK ---- #
@@ -48,7 +48,7 @@ class Mouse:
                 self.right_click = Click.NONE
 
     def render(self, surf):
-        pg.draw.rect(surf, RED, (self.pos[0], self.pos[1], 5, 5))
+        pg.draw.rect(surf, RED, (self.pos[0], self.pos[1], 3, 3))
 
     def rect(self) -> pg.Rect:
         return self.mouse_rect

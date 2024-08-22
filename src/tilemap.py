@@ -35,15 +35,25 @@ for p in [[[x - 2, y - 2] for x in range(5)] for y in range(5)]:
 
 HIT_TILE_PATH = 'src/images/tiles/tileset/'
 OBJ_TILE_PATH = 'src/images/tiles/objects/'
+
 '''
     Tile Map:
         - hash table
             - pos (x,y)
                 - layers (-1,0,1)
-                    - tiles [pos, tile_type, tile_name, image_id, pg.image]
-                            [[8,8], tileset, tileset_0, 1, <Surface 16x16>]
+                    - tiles
+                        [tile_type, tile_name, tile_id, tile_img_path, tile_image] 
+                        ['bg_tiles', 'bg_tiles_0', '2', 'src/tiles/bg_tiles/bg_tiles_0/1.png', <Surface(16x16x32 SW)>]
 '''
 
+
+def tuple_to_str(tuple):
+    key = f'{tuple[0]},{tuple[1]}'
+    return key
+
+def str_to_tuple(str):
+    key = str.split(',')
+    return (int(key[0]), int(key[1]))
 
 class TileMap:
     def __init__(self, app) -> None:
@@ -135,10 +145,15 @@ class Tile_Editor:
                 tile_imgs = sorted(tileset_imgs)
                 self.tile_map.tiles[pos][layer][-1] = utils.get_image(tile_imgs[auto_tile_config[auto_tile_key]], [s.CELL_SIZE,s.CELL_SIZE])
                 self.tile_map.tiles[pos][layer][2] = str(auto_tile_config[auto_tile_key])
+
+                # NOTE might have to change it auto tile gets more complex, but fine for now NOTE
+                self.tile_map.tiles[pos][layer][3] = self.auto_tile_new_tile_path(self.tile_map.tiles[pos][layer], auto_tile_config[auto_tile_key])
+
             for n in neighbors:
                 dfs(n, v)
         dfs(key, v)
 
+    def auto_tile_new_tile_path(self, tile, new_id): return f'{s.TILESET_PATH}{tile[1]}/{new_id}.png'
 
     def test_render(self, surf, offset=[0, 0]):
         for c in range(int(0 + offset[0] // s.CELL_SIZE) - 1, int((s.COLS * s.CELL_SIZE + offset[0]) // s.CELL_SIZE) + 2):
@@ -163,6 +178,54 @@ class Tile_Editor:
                     tile = [pos] + data
                     objects.append(tile)
         return layers, objects
+    
+    def save_map(self, map_name):
+        saved_tiles = {} 
+        layers_found = set()
+
+        for key, layer in self.tile_map.tiles.items():
+            layers_copy = {}
+            for l_num, tile in layer.items():
+                layers_copy[str(l_num)] = [tile[0], tile[1], tile[2], tile[3], tile[4]]
+            saved_tiles[tuple_to_str(key)] = layers_copy
+            for layer in layer:
+                layers_found.add(l_num)
+
+        layers = []
+        for l in layers_found:
+            layers.append(l)
+
+        path = f'{s.MAP_PATH}/{map_name}.json'
+        fl = open(path, 'w')
+        json.dump({
+            'all_layers': layers,
+            'tiles': saved_tiles,
+        }, fl)
+        fl.close()
+
+    def reset_map(self):
+        self.map.tiles = {}
+        self.layers = set()
+
+    def load_map(self, map_name):
+        new_tiles = {}
+        all_layers = set()
+
+        path = f'{s.MAP_PATH}{map_name}'
+        fl = open(path, 'r')
+        map_data = json.load(fl)
+        fl.close()
+
+        for k, layers in map_data['tiles'].items():
+            key = str_to_tuple(k)
+            new_tiles[key] = {}
+
+            for layer, tile in layers.items():
+                tile.append(utils.get_image(tile[3], tile[4]['size']))
+                new_tiles[key][layer] = tile
+
+        self.tile_map.tiles = new_tiles
+        self.tile_map.all_layers = map_data['all_layers']
 
     def get_tile_data(self):
         # TILE_TYPES: tileset, bg_tiles, objects, markers
