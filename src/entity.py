@@ -4,15 +4,21 @@ import src.settings as s
 class Entity:
     def __init__(self, app, pos, size, type, animated=None) -> None:
         self.app = app 
+
+        # ----- LIST VARS
         self.vel = [0,0]
         self.pos = pos.copy()
         self.size = size.copy()
-        self.type = type 
+        self.scale = [1,1]
 
+        # ----- VARS
+        self.type = type 
         self.speed = s.DEFAULT_SPEED
         self.max_jumps = s.DEFAULT_JUMPS
         self.jumps = s.DEFAULT_JUMPS
         self.jump_scale = s.DEFAULT_JUMP_SCALE
+        self.flip = False
+
         self.animated = animated
 
         if animated:
@@ -24,7 +30,23 @@ class Entity:
         self.anim.update(self.app.dt)
 
     def render(self, surf, offset=[0,0]):
+        offset = offset.copy()
+        if self.anim.config['offset']:
+            offset[0] += self.anim.config['offset'][0]
+            offset[1] += self.anim.config['offset'][1]
         image = self.anim.image()
+        if self.scale != [1, 1]:
+            image = pg.transform.scale(image, 
+                                     (int(self.scale[0] * self.anim.config['size'][0]), int(self.scale[1] * self.anim.config['size'][1])))
+            x_diff = (s.self.anim.config['size'][0] - image.get_width()) // 2
+            y_diff = (s.self.anim.config['size'][0] - image.get_height())
+            offset[0] -= x_diff
+            offset[1] -= y_diff
+
+        if self.flip:
+            image = pg.transform.flip(image, self.flip, False)
+
+
         pg.draw.rect(surf, (255,0,0), (self.pos[0] - offset[0], self.pos[1] - offset[1], s.CELL_SIZE, s.CELL_SIZE), 1)
         surf.blit(image, (self.pos[0] - offset[0], self.pos[1] - offset[1]))
 
@@ -88,6 +110,9 @@ class Player(Entity):
 
     def update(self):
         super().update()
+
+        if self.app.inputs[1]: self.flip = False
+        elif self.app.inputs[0]: self.flip = True
 
         self.vel[1] = min(10, self.vel[1] + 1)
         self.vel[0] = (self.app.inputs[1] - self.app.inputs[0]) * self.speed
