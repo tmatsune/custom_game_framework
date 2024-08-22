@@ -99,7 +99,6 @@ def test_game_loop():
         if app.offset[1] + s.HEIGHT > app.edges[3]:
             app.offset[1] = app.edges[3] - s.HEIGHT
 
-
         # -------- RENDER TILES ------- # 
 
         layers = app.tile_map.get_visible_tiles(app.offset)
@@ -112,7 +111,6 @@ def test_game_loop():
 
         app.player.update()
         app.player.render(display, app.offset)
-
 
         # ------ BLIT SCREENS ------ #
         screenshake_offset = [0,0]
