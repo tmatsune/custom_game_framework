@@ -68,8 +68,6 @@ class Level_Editor:
         # --------- HANDLE CURR TILE ---------- #
 
 
-
-
         if self.tile_type >= 0:
             self.tile_type %= len(self.tile_editor.tile_data)
 
@@ -78,10 +76,11 @@ class Level_Editor:
             elif self.tile_name < 0:
                 self.tile_name = len(self.tile_editor.tile_data[self.tile_type]) - 1
 
-            if self.tile_id >= 0:
-                self.tile_id %= len(self.tile_editor.tile_data[self.tile_type][self.tile_name][2])
-            elif self.tile_id < 0:
-                self.tile_id = len(self.tile_editor.tile_data[self.tile_type][self.tile_name][2]) - 1
+            if self.curr_tile and self.tile_editor.tile_data[self.tile_type][0][0] in {'tileset', 'bg_tiles', 'decor'}:
+                if self.tile_id >= 0:
+                    self.tile_id %= len(self.tile_editor.tile_data[self.tile_type][self.tile_name][2])
+                elif self.tile_id < 0:
+                    self.tile_id = len(self.tile_editor.tile_data[self.tile_type][self.tile_name][2]) - 1
 
         elif self.tile_type < 0:
             self.tile_type = len(self.tile_editor.tile_data) - 1
@@ -105,6 +104,16 @@ class Level_Editor:
 
             tile_image = utils.get_image(tile_path, tile_config['size'])
             self.curr_tile = [tile_type, tile_name, tile_id, tile_path, tile_config, tile_image]
+
+        elif self.tile_editor.tile_data[self.tile_type][0][0] == 'markers':
+            tile_type = self.tile_editor.tile_data[self.tile_type][0][0]
+            marker_name = self.tile_editor.tile_data[self.tile_type][self.tile_name][1]
+            ui_data['tile_type'] = tile_type
+            ui_data['tile_name'] = marker_name
+
+            tile_path = self.tile_editor.tile_data[self.tile_type][self.tile_name][2]
+            tile_image = utils.get_image(tile_path, [s.CELL_SIZE, s.CELL_SIZE])
+            self.curr_tile = [tile_type, marker_name, None, tile_path, None, tile_image]
 
         # --------- MAIN RENDER FUNS ------- # 
 

@@ -8,7 +8,7 @@ import src.entity as entities
 import src.mouse as m
 
 '''
-GAME_ENGINE: VERSION 1.0
+CUSTOM_GAME_FRAMEWORK: VERSION 1.0
 '''
 
 class App:
@@ -26,6 +26,7 @@ class App:
         self.circle_particles = [] 
         self.offset = [0,0] 
         self.inputs = [False, False, False, False]
+        self.edges = [s.inf, s.n_inf, s.inf, s.n_inf]  # x, -x, y, -y
 
         # ---- CLASSES 
         self.tile_map = tilemap.TileMap(self)
@@ -37,13 +38,28 @@ class App:
 
     def load_spawn_points(self, level_data):
         pass
+
     def load_level_data(self, level):
-        self.tile_map.load_map(level)
+        markers = self.tile_map.load_map(level)
+        for pos in self.tile_map.tiles:
+            x = pos[0] * s.CELL_SIZE
+            y = pos[1] * s.CELL_SIZE
+            if x < self.edges[0]: self.edges[0] = x
+            if x > self.edges[1]: self.edges[1] = x + s.CELL_SIZE
+            if y < self.edges[2]: self.edges[2] = y + s.CELL_SIZE*2
+            if y > self.edges[3]: self.edges[3] = y + s.CELL_SIZE*1
+        return markers
 
     def load_level(self, level):
-        level_data = self.load_level_data(level)
-        spawn_points = self.load_spawn_points(level_data)
-        self.player = entities.Player(self, [50,50], [s.CELL_SIZE, s.CELL_SIZE], 'player', True)
+        markers = self.load_level_data(level)
+        #markers = self.load_spawn_points(level_data)
+        player_starting_pos = [100,100]
+        
+        for key, data in markers.copy().items():
+            if data[1] == 'player_marker.png':
+                player_starting_pos = [key[0]*s.CELL_SIZE, key[1]*s.CELL_SIZE]
+                del markers[key]
+        self.player = entities.Player(self, player_starting_pos, [s.CELL_SIZE, s.CELL_SIZE], 'player', True)
 
 # ---- INIT PG
 pg.init()

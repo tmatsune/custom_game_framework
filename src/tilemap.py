@@ -60,6 +60,7 @@ class TileMap:
         self.app = app
         self.tiles = {}
         self.objects = {}
+        self.markers = {}
         self.all_layers = []
 
     def get_visible_tiles(self, offset=[0,0]):
@@ -84,8 +85,9 @@ class TileMap:
         return tiles
 
     def load_map(self, map_name):
+        self.reset_map()
         new_tiles = {}
-        all_layers = set()
+        new_markers = {}
 
         path = f'{s.MAP_PATH}{map_name}.json'
         fl = open(path, 'r')
@@ -101,9 +103,22 @@ class TileMap:
                 tile.insert(0, (key[0]*s.CELL_SIZE, key[1]*s.CELL_SIZE))
                 new_tiles[key][layer] = tile
 
+        if 'markers' in map_data:
+            for k, marker in map_data['markers'].items():
+                key = str_to_tuple(k)
+                new_markers[key] = marker
+
         self.tiles = new_tiles
         self.all_layers = map_data['all_layers']
         self.all_layers.sort()
+
+        return new_markers
+
+    def reset_map(self):
+        self.tiles = {}
+        self.objects = {}
+        self.markers = {}
+        self.all_layers = []
 
 # tile: (0,0): ['tileset', 'tileset_1', '0', 'src/tiles/tileset/tileset_1/0.png', <Surface(16x16x32 SW)>]
 class Tile_Editor:
@@ -113,10 +128,14 @@ class Tile_Editor:
         self.tile_map = TileMap(self)
         self.layers = set()
         self.tiles = {}
+        self.markers = {}
         self.get_tile_data()
 
     def add_tile(self, pos, tile_data, layer):
         key = (int(pos[0]), int(pos[1]))
+        if tile_data[0] == 'markers':
+            self.markers[key] = tile_data
+            return 
         if layer not in self.layers:
             self.layers.add(layer)
         if key not in self.tile_map.tiles:
@@ -179,6 +198,8 @@ class Tile_Editor:
                 if pos in self.tile_map.tiles:
                     for layer, data in self.tile_map.tiles[pos].items():
                         surf.blit(data[-1], ( (pos[0] * s.CELL_SIZE) - offset[0], (pos[1] * s.CELL_SIZE) - offset[1]) )
+                if pos in self.markers:
+                    surf.blit(self.markers[pos][-1], ( (pos[0] * s.CELL_SIZE) - offset[0], (pos[1] * s.CELL_SIZE) - offset[1]) )
 
     def get_visible_tiles(self, offset=[0,0]):
         layers = {l: [] for l in self.all_layers}
@@ -198,6 +219,7 @@ class Tile_Editor:
     
     def save_map(self, map_name):
         saved_tiles = {} 
+        saved_markers = {}
         layers_found = set()
 
         for key, layer in self.tile_map.tiles.items():
@@ -208,6 +230,9 @@ class Tile_Editor:
             for layer in layer:
                 layers_found.add(l_num)
 
+        for key, marker in self.markers.items():
+            saved_markers[tuple_to_str(key)] = [marker[0], marker[1], marker[3]]
+
         layers = []
         for l in layers_found:
             layers.append(l)
@@ -217,6 +242,7 @@ class Tile_Editor:
         json.dump({
             'all_layers': layers,
             'tiles': saved_tiles,
+            'markers': saved_markers
         }, fl)
         fl.close()
 
@@ -226,6 +252,7 @@ class Tile_Editor:
 
     def load_map(self, map_name):
         new_tiles = {}
+        new_markers = {}
         all_layers = set()
 
         path = f'{s.MAP_PATH}{map_name}'
@@ -241,7 +268,13 @@ class Tile_Editor:
                 tile.append(utils.get_image(tile[3], tile[4]['size']))
                 new_tiles[key][layer] = tile
 
+        for k, marker in map_data['markers'].items():
+            key = str_to_tuple(k)
+            marker.append(utils.get_image(marker[2], [s.CELL_SIZE, s.CELL_SIZE]))
+            new_markers[key] = marker
+
         self.tile_map.tiles = new_tiles
+        self.markers = new_markers
         self.tile_map.all_layers = map_data['all_layers']
 
     def get_tile_data(self):
@@ -306,6 +339,11 @@ class Tile_Editor:
             decors.append(['decor', decor_name, decor_images_paths, config])
         self.tile_data.append(decors)
 
+        markers = []
+        for marker_name in marker_names:
+            marker_path = f'{s.MARKERS_PATH}{marker_name}'
+            markers.append(['markers', marker_name, marker_path])
+        self.tile_data.append(markers)
 
         '''
             [

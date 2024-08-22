@@ -11,6 +11,8 @@ FPS = 60
 CELL_SIZE = 16
 COLS = WIDTH // CELL_SIZE
 ROWS = HEIGHT // CELL_SIZE
+inf = float('inf')
+n_inf = float('-inf')
 
 # ------ COLORS 
 RED = (255, 0, 0)
