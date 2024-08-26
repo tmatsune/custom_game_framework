@@ -10,7 +10,7 @@ import src.mouse as m
 '''
 CUSTOM_GAME_FRAMEWORK: VERSION 1.0
 '''
-game_name = 'untitled game'
+game_name = 'Merica'
 
 class App:
     def __init__(self) -> None:
